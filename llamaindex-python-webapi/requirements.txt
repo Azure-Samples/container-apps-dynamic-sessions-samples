@@ -1,0 +1,6 @@
+fastapi==0.111.0
+azure-identity==1.16.0
+python-dotenv==1.0.1
+llama-index==0.10.34
+llama-index-llms-azure-openai==0.1.7
+https://gist.github.com/anthonychu/f860806c7676c41a737ac8eda893ad25/raw/c1e6b21c40bff8a4117151f897f3539790d8216d/llama_index_tools_azure_dynamic_sessions-0.1.3-py3-none-any.whl
