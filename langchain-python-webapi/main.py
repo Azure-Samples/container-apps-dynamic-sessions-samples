@@ -11,17 +11,18 @@ dotenv.load_dotenv()
 
 app = FastAPI()
 
-credential = DefaultAzureCredential()
-os.environ["OPENAI_API_TYPE"] = "azure_ad"
-os.environ["OPENAI_API_KEY"] = credential.get_token("https://cognitiveservices.azure.com/.default").token
-pool_management_endpoint = os.getenv("POOL_MANAGEMENT_ENDPOINT")
 
 @app.get("/")
 async def root():
-    return RedirectResponse("/chat?message=what is the current date and time?")
+    return RedirectResponse("/docs")
 
 @app.get("/chat")
 async def chat(message: str):
+    credential = DefaultAzureCredential()
+    os.environ["OPENAI_API_TYPE"] = "azure_ad"
+    os.environ["OPENAI_API_KEY"] = credential.get_token("https://cognitiveservices.azure.com/.default").token
+    pool_management_endpoint = os.getenv("POOL_MANAGEMENT_ENDPOINT")
+
     llm = AzureChatOpenAI(
         azure_deployment="gpt-35-turbo",
         openai_api_version="2024-02-01",
@@ -46,4 +47,6 @@ async def chat(message: str):
 
     response = react_agent_executor.invoke({"input": message})
 
-    return response
+    return {
+        "output": response["output"],
+    }
