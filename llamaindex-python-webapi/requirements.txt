@@ -3,4 +3,4 @@ azure-identity==1.16.0
 python-dotenv==1.0.1
 llama-index==0.10.34
 llama-index-llms-azure-openai==0.1.7
-https://gist.github.com/anthonychu/f860806c7676c41a737ac8eda893ad25/raw/a23861f890a20731e711522534543efdc707387c/llama_index_tools_azure_code_interpreter-0.1.0b1-py3-none-any.whl
+llama-index-tools-azure-code-interpreter==0.1.0
