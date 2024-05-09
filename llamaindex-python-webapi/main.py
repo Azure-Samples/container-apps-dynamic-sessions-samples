@@ -1,12 +1,14 @@
-from datetime import datetime, timedelta, timezone
 import os
+from datetime import datetime, timedelta, timezone
+
+import dotenv
 from azure.identity import DefaultAzureCredential
 from fastapi import FastAPI
-import dotenv
 from fastapi.responses import RedirectResponse
-from llama_index.llms.azure_openai import AzureOpenAI
-from llama_index.tools.azure_code_interpreter import AzureCodeInterpreterToolSpec
 from llama_index.core.agent import ReActAgent
+from llama_index.llms.azure_openai import AzureOpenAI
+from llama_index.tools.azure_code_interpreter import \
+    AzureCodeInterpreterToolSpec
 
 dotenv.load_dotenv()
 
