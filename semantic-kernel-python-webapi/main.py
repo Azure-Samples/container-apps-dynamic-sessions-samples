@@ -1,26 +1,24 @@
 import datetime
 import os
+
+import dotenv
+from azure.core.exceptions import ClientAuthenticationError
 from azure.identity import DefaultAzureCredential
 from fastapi import FastAPI
-import dotenv
 from fastapi.responses import RedirectResponse
-from azure.core.exceptions import ClientAuthenticationError
 from semantic_kernel import Kernel
-from semantic_kernel.exceptions.function_exceptions import FunctionExecutionException
-from semantic_kernel.connectors.ai.open_ai.services.azure_chat_completion import AzureChatCompletion
-from semantic_kernel.utils.settings import (
-    azure_container_apps_settings_from_dot_env_as_dict,
-    azure_openai_settings_from_dot_env_as_dict,
-)
-from semantic_kernel.core_plugins.sessions_python_tool.sessions_python_plugin import (
-    SessionsPythonTool,
-)
-from semantic_kernel.connectors.ai.open_ai.prompt_execution_settings.azure_chat_prompt_execution_settings import (
-    AzureChatPromptExecutionSettings,
-)
-from semantic_kernel.connectors.ai.function_call_behavior import FunctionCallBehavior
-from semantic_kernel.functions.kernel_arguments import KernelArguments
+from semantic_kernel.connectors.ai.function_call_behavior import \
+    FunctionCallBehavior
+from semantic_kernel.connectors.ai.open_ai.prompt_execution_settings.azure_chat_prompt_execution_settings import \
+    AzureChatPromptExecutionSettings
+from semantic_kernel.connectors.ai.open_ai.services.azure_chat_completion import \
+    AzureChatCompletion
 from semantic_kernel.contents.chat_history import ChatHistory
+from semantic_kernel.core_plugins.sessions_python_tool.sessions_python_plugin import \
+    SessionsPythonTool
+from semantic_kernel.exceptions.function_exceptions import \
+    FunctionExecutionException
+from semantic_kernel.functions.kernel_arguments import KernelArguments
 
 dotenv.load_dotenv()
 
