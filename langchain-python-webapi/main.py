@@ -1,11 +1,12 @@
 import os
+
+import dotenv
 from azure.identity import DefaultAzureCredential
+from fastapi import FastAPI
+from fastapi.responses import RedirectResponse
+from langchain import agents, hub
 from langchain_azure_dynamic_sessions import SessionsPythonREPLTool
 from langchain_openai import AzureChatOpenAI
-from langchain import agents, hub
-from fastapi import FastAPI
-import dotenv
-from fastapi.responses import RedirectResponse
 
 dotenv.load_dotenv()
 
