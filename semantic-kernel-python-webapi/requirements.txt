@@ -1,0 +1,4 @@
+fastapi==0.111.0
+azure-identity==1.16.0
+python-dotenv==1.0.1
+https://gist.github.com/anthonychu/f860806c7676c41a737ac8eda893ad25/raw/8d004dc9ff376396be6abaab764f5af82851dd0b/semantic_kernel-0.9.7b1-py3-none-any.whl
