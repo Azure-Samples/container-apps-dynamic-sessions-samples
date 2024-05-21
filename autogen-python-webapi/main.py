@@ -26,7 +26,7 @@ code_writer_agent = ConversableAgent(
 )
 
 # Endpoint for ACA session management, fetched from environment variables
-aca_pool_management_endpoint = os.getenv("ACA_SESSIONS_ENDPOINT")
+aca_pool_management_endpoint = os.getenv("POOL_MANAGEMENT_ENDPOINT")
 aca_sessions_executor = ACASessionsExecutor(aca_pool_management_endpoint)
 
 # Initialize the CodeExecutor agent
