@@ -1,0 +1,4 @@
+fastapi==0.111.0
+azure-identity==1.16.0
+python-dotenv==1.0.1
+pyautogen==0.2.27
