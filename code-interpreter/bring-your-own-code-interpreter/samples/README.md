@@ -7,4 +7,4 @@ This directory provides several working examples for setting up Custom Container
 - [JavaScript](./javascript/Dockerfile) using the `ijavascript` kernel
 - [Python](./python/Dockerfile) using the built-in `Python` kernel
 
-If you notice anything missing or encounter inaccurate steps, please report it as outlined [here](../../SUPPORT.md) or raise a Pull Request against this repository to help other fellow developers. 
+If you notice anything missing or encounter inaccurate steps, please report it as outlined [here](../../../SUPPORT.md) or raise a Pull Request against this repository to help other fellow developers. 

@@ -16,4 +16,4 @@ There is no fixed release cadence for base BYOC images, but updates are publishe
 A detailed guide on transitioning from the Built-in Code Interpreter to a Custom Container-based Dynamic Session Pool is available [here](./changes-from-code-interpreter-to-custom-interpreter.md).
 
 ## What’s the Best Way to Get Help or Support for Custom Container-based Dynamic Session Pool on the Base BYOC Image?
-For support, refer to the [support documentation](../SUPPORT.md). When raising an issue in the ACA public GitHub project, include `[Sessions]` and `[BYOC]` in the title to ensure it’s routed to the appropriate team.
+For support, refer to the [support documentation](../../SUPPORT.md). When raising an issue in the ACA public GitHub project, include `[Sessions]` and `[BYOC]` in the title to ensure it’s routed to the appropriate team.

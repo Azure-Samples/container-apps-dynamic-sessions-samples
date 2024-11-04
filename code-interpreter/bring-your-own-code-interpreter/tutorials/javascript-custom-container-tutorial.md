@@ -1,4 +1,4 @@
-# Python Code Interpreter with a Custom Container
+# Javascript Code Interpreter with a Custom Container
 
 This tutorial walks you through creating a Custom Container-based Dynamic Sessions pool by extending the Bring Your Own Code (BYOC) functionality.
 
@@ -7,7 +7,7 @@ This tutorial walks you through creating a Custom Container-based Dynamic Sessio
 2. Set up a Custom Container-based Dynamic Sessions pool using this custom image.
 3. Use Code Interpreter-style REST APIs to interact with the session pool, showing that a Custom Container functions identically to the Code Interpreter once a Dynamic Sessions pool is established.
 
-We'll install the Python [pillow](https://pillow.readthedocs.io/en/stable/handbook/tutorial.html) package, upload an image to the session, crop the image using code execution in the session, and then download the cropped image.
+We will upload a sample JavaScript script to a session and execute it using the Custom Container-based Dynamic Sessions pool code execution APIs. For additional context and explanations of certain concepts, please refer to the equivalent [Python tutorial](./python-custom-container-tutorial.md) as well.
 
 ## Prerequisites
 - **Azure CLI**: Ensure [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/install-azure-cli) is installed and configured.
@@ -36,10 +36,10 @@ For example, if you selected the location `West US 2`:
 
 ```bash
 SUBSCRIPTION=<YOUR_SUBSCRIPTION_ID>
-RESOURCE_GROUP_NAME="python-custom-container-rg"
+RESOURCE_GROUP_NAME="js-custom-container-rg"
 LOCATION="westus2"
-ENVIRONMENT="python-custom-container-aca-env"
-SESSION_POOL_NAME="py-custom-container-session-pool"
+ENVIRONMENT="js-custom-container-aca-env"
+SESSION_POOL_NAME="js-custom-container-session-pool"
 ```
 
 If needed, you can query your subscription ID:
@@ -48,7 +48,7 @@ If needed, you can query your subscription ID:
 az account list --output table
 ```
 
-### 1.a Create an Azure Resource Group
+### Create an Azure Resource Group
 
 Set your subscription and create a resource group:
 
@@ -57,13 +57,13 @@ az account set -s $SUBSCRIPTION
 az group create --name $RESOURCE_GROUP_NAME --location $LOCATION
 ```
 
-### 1.b Clone the GitHub Samples Repository
+### Clone the GitHub Samples Repository
 
 Download the sample files from GitHub:
 
 ```bash
 git clone https://github.com/Azure-Samples/container-apps-dynamic-sessions-samples.git
-cd container-apps-dynamic-sessions-samples/bring-your-own-code-interpreter/samples/python
+cd container-apps-dynamic-sessions-samples/code-interpreter/bring-your-own-code-interpreter/samples/javascript
 ```
 
 ## 2. Create a Custom Image from the Base BYOC Container Image
@@ -71,18 +71,18 @@ cd container-apps-dynamic-sessions-samples/bring-your-own-code-interpreter/sampl
 For more customization and local debugging, see the detailed instructions [here](../creating-container-image.md). For this tutorial, let’s use the sample files included in the repository.
 
 ```bash
-docker build -t my-python-code-interpreter:0.0.1 -f ./Dockerfile .
+docker build -t my-javascript-code-interpreter:0.0.1 -f ./Dockerfile .
 
 # Push the image to a private or public container registry
-docker build -t <your-docker-hub-username>/my-python-code-interpreter:0.0.1 -f ./Dockerfile .
-docker push docker.io/<your-docker-hub-username>/my-python-code-interpreter:0.0.1
+docker build -t <your-docker-hub-username>/my-javascript-code-interpreter:0.0.1 -f ./Dockerfile .
+docker push docker.io/<your-docker-hub-username>/my-javascript-code-interpreter:0.0.1
 ```
 
-To add more Python packages, update `requirements.txt` as needed. 
+To add more JavaScript packages, update `package.json` as needed. 
 
 If you have noticed that the Dockerfile starts with `FROM mcr.microsoft.com/k8se/services/codeinterpreter-base:0.0.3-ubuntu24.04`, extending the base BYOC container image.
 
-👉 Assuming your published image is `docker.io/rajneeshmitharwal/my-python-code-interpreter:0.0.1`.
+👉 Assuming your published image is `docker.io/rajneeshmitharwal/my-javascript-code-interpreter:0.0.1`.
 
 ## 3. Create an Azure Container Apps (ACA) Environment
 
@@ -96,8 +96,6 @@ az containerapp env create \
   --enable-workload-profiles
 ```
 
-This tutorial uses Azure CLI to provision the ACA environment, but you can also use the Azure Portal, ARM templates, and other options. For additional parameters, see [Managed Environment API Documentation](https://learn.microsoft.com/en-us/rest/api/containerapps/managed-environments/create-or-update?view=rest-containerapps-2024-03-01&tabs=HTTP).
-
 ## 4. Set Up a Custom Container-Based Dynamic Sessions Pool
 
 Now, create a Dynamic Sessions Pool using the custom container image you published in the previous step:
@@ -106,7 +104,7 @@ Now, create a Dynamic Sessions Pool using the custom container image you publish
 az containerapp sessionpool create -n $SESSION_POOL_NAME -g $RESOURCE_GROUP_NAME \
     --environment $ENVIRONMENT --cpu 0.5 --memory 1Gi --target-port 6000 \
     --container-type CustomContainer \
-    --image docker.io/rajneeshmitharwal/my-python-code-interpreter:0.0.1 \
+    --image docker.io/rajneeshmitharwal/my-javascript-code-interpreter:0.0.1 \
     --cooldown-period 360 --max-sessions 5 \
     --network-status EgressEnabled \
     --location $LOCATION
@@ -118,7 +116,7 @@ Wait until the session pool's provisioning state shows as `Succeeded`. You can c
 az containerapp sessionpool show -n $SESSION_POOL_NAME  -g $RESOURCE_GROUP_NAME --query "properties.provisioningState" -o tsv
 ```
 
-To explore additional options and configurations, use the following command or refer to the [Session Pool API Documentation](https://learn.microsoft.com/en-us/rest/api/containerapps/container-apps-session-pools/create-or-update?view=rest-containerapps-2024-08-02-preview&tabs=HTTP) for a complete list of parameters:
+To explore additional options and configurations, use the following command:
 
 ```bash
 az containerapp sessionpool create --help 
@@ -128,7 +126,7 @@ az containerapp sessionpool create --help
 
 For a comprehensive guide on authentication and authorization, refer to the [documentation](https://learn.microsoft.com/en-us/azure/container-apps/sessions-code-interpreter#authentication).
 
-### 5.a Configure Authorization for the Current User
+### Configure Authorization for the Current User
 To enable API access, assign the appropriate role to the signed-in user.
 
 ```bash
@@ -140,7 +138,7 @@ az role assignment create \
   --scope "/subscriptions/$SUBSCRIPTION/resourceGroups/$RESOURCE_GROUP_NAME/providers/Microsoft.App/sessionPools/$SESSION_POOL_NAME"
 ```
 
-### 5.b Set Up Required Authentication Variables
+### Set Up Required Authentication Variables
 
 For direct access to the session pool’s management API, generate an access token and include it in the `Authorization` header of your requests. Ensure the token contains an audience (`aud`) claim with the value `https://dynamicsessions.io`.
 
@@ -149,20 +147,20 @@ JWT_ACCESS_TOKEN=$(az account get-access-token --resource https://dynamicsession
 AUTH_HEADER="Authorization: Bearer $JWT_ACCESS_TOKEN"
 ```
 
-### 5.c Retrieve the Session Pool Management Endpoint
+### Retrieve the Session Pool Management Endpoint
 
 ```bash
 SESSION_POOL_MANAGEMENT_ENDPOINT=$(az containerapp sessionpool show -n $SESSION_POOL_NAME -g $RESOURCE_GROUP_NAME --query "properties.poolManagementEndpoint" -o tsv)
 ```
 
-### 5.d Test the Setup with a Sample Code Execution
+### Test the Setup with a Sample Code Execution
 
 Verify your setup by executing a simple code sample in the session pool.
 
 ```bash
 curl -v -X 'POST' -H "$AUTH_HEADER" "$SESSION_POOL_MANAGEMENT_ENDPOINT/executions?api-version=2024-10-02-preview&identifier=test" -H 'Content-Type: application/json' -d '
 {
-    "code": "print(\"hello world\")"
+    "code": "console.log(\"hello world\")"
 }'
 ```
 
@@ -170,49 +168,45 @@ You should see `"status":"Succeeded"` and `"result.stdout"` with `"hello world\n
 
 From here on, we will use `session-test` as the [identifier](https://learn.microsoft.com/en-us/azure/container-apps/sessions-code-interpreter#session-identifiers) to ensure all operations are executed within the context of the `session-test` session.
 
-### 6. Upload a Sample Image to the Session
+### 6. Upload a JavaScript Code Script to the Session
 
-#### 6.a Download a Sample Image or Use Your Own
-
-```bash
-curl -o sample.jpg "https://upload.wikimedia.org/wikipedia/commons/1/16/HDRI_Sample_Scene_Balls_%28JPEG-HDR%29.jpg"
-```
-
-#### 6.b Upload the Local File to the Session Using the Session File Upload API
+Upload a local JavaScript file to the session using the session file upload API:
 
 ```bash
-curl -X POST -H "$AUTH_HEADER" -F file=@sample.jpg "$SESSION_POOL_MANAGEMENT_ENDPOINT/files?api-version=2024-10-02-preview&identifier=session-test"
+curl -X POST -H "$AUTH_HEADER" -F file=@sample-js-code.js "$SESSION_POOL_MANAGEMENT_ENDPOINT/files?api-version=2024-10-02-preview&identifier=session-test"
 ```
 
-Sample Response:
+**Sample Response:**
 
 ```json
 HTTP 200 OK
 {
-  "name": "sample.jpg",
-  "sizeInBytes": 146534,
-  "lastModifiedAt": "2024-11-03T06:59:11.815973172Z",
-  "contentType": "image/jpeg",
+  "name": "sample-js-code.js",
+  "sizeInBytes": 1215,
+  "lastModifiedAt": "2024-11-03T09:19:47.110733144Z",
+  "contentType": "text/javascript; charset=utf-8",
   "type": "File"
 }
 ```
 
-### 7. Crop the Uploaded Image Using the Session Code Execution API
+### 7. Execute the Uploaded JavaScript Code Using the Session Code Execution API
+
+Now, let's execute the previously uploaded JavaScript file using the session code execution API. First, encode the contents of `run-js-script.js` to base-64 using the `base64` command line tool:
 
 ```bash
-curl -v -X POST -H "$AUTH_HEADER" "$SESSION_POOL_MANAGEMENT_ENDPOINT/executions?api-version=2024-10-02-preview&identifier=session-test" -H 'Content-Type: application/json' -d '
-{
-    "code": "from PIL import Image\nImage.open(\"/mnt/data/sample.jpg\").crop((100, 100, 400, 400)).save(\"/mnt/data/cropped_sample.jpg\")",
-    "executionType": "Synchronous"
-}'
+curl -X POST -H "$AUTH_HEADER" "$SESSION_POOL_MANAGEMENT_ENDPOINT/executions?api-version=2024-10-02-preview&identifier=session-test" -H 'Content-Type: application/json' -d "{
+  \"code\": \"$(base64 -w 0 run-js-script.js)\",
+  \"executionType\": \"Synchronous\",
+  \"codeInputType\": \"InlineBase64\"
+}"
 ```
 
-Sample Response:
+**Sample Response:**
 
 ```json
 HTTP 202 Accepted
 {
-  "id": "ae2e682e-3690-4df2-bd6e-536b06afd1d6",
+  "id": "7b427f95-884a-4ae6-8012-2df7a4e540a3",
   "identifier": "session-test",
   "sessionId": "session-test",
   "executionType": "Synchronous",
@@ -221,7 +215,7 @@ HTTP 202 Accepted
     "stdout": "",
     "stderr": "",
     "executionResult": "",
-    "executionTimeInMilliseconds": 16
+    "executionTimeInMilliseconds": 3
   },
   "rawResult": {
     "hresult": 0,
@@ -232,44 +226,44 @@ HTTP 202 Accepted
     "stdout": "",
     "stderr": "",
     "diagnosticInfo": {
-      "executionRequestTimeInMilliSeconds": 16,
+      "executionRequestTimeInMilliSeconds": 3,
       "executionProcessResponseTimeInMilliSeconds": 0,
-      "executionDuration": 16,
+      "executionDuration": 3,
       "identifier": "session-test"
     },
-    "operationId": "ae2e682e-3690-4df2-bd6e-536b06afd1d6"
+    "operationId": "7b427f95-884a-4ae6-8012-2df7a4e540a3"
   }
 }
 ```
 
-### 8. Download the Cropped File Using the Session File Download API
+### 8. Download the Processed File Using the Session File Download API
 
-To check if `cropped_sample.jpg` exists, use the session's file metadata API call:
+Check if the output file `filtered_users.json` exists by using the session’s file metadata API:
 
 ```bash
-curl -X GET -H "$AUTH_HEADER" "$SESSION_POOL_MANAGEMENT_ENDPOINT/files/cropped_sample.jpg?api-version=2024-10-02-preview&identifier=session-test" 
+curl -X GET -H "$AUTH_HEADER" "$SESSION_POOL_MANAGEMENT_ENDPOINT/files/filtered_users.json?api-version=2024-10-02-preview&identifier=session-test" 
 ```
 
-Sample Response:
+**Sample Response:**
 
 ```json
 HTTP 200 OK
 {
-  "name": "cropped_sample.jpg",
-  "sizeInBytes": 10969,
-  "lastModifiedAt": "2024-11-03T07:06:25.079495309Z",
-  "contentType": "image/jpeg",
+  "name": "filtered_users.json",
+  "sizeInBytes": 2,
+  "lastModifiedAt": "2024-11-03T09:36:59.542590532Z",
+  "contentType": "application/json",
   "type": "File"
 }
 ```
 
-To download the actual file content, use the session's file download API call:
+To download the file content, use the session’s file download API:
 
 ```bash
-curl -X GET -H "$AUTH_HEADER" "$SESSION_POOL_MANAGEMENT_ENDPOINT/files/cropped_sample.jpg/content?api-version=2024-10-02-preview&identifier=session-test" -o cropped_sample.jpg
+curl -X GET -H "$AUTH_HEADER" "$SESSION_POOL_MANAGEMENT_ENDPOINT/files/filtered_users.json/content?api-version=2024-10-02-preview&identifier=session-test" -o filtered_users.json
 ```
 
-The file `cropped_sample.jpg` on your local storage is the cropped image processed by the Custom Container-based Dynamic Session Pool.
+The file `filtered_users.json` on your local storage is the output processed by the Custom Container-based Dynamic Session Pool.
 
 ### 9. Cleanup
 
@@ -278,6 +272,12 @@ This command will remove the specified resource group along with all resources c
 ```bash
 az group delete --name $RESOURCE_GROUP_NAME --yes
 ```
+
+## Few Gotchas with the iJavascript Kernel
+
+- When defining variables in Node.js, avoid using `const`. Variables declared with `const` are treated as global within a session, which can lead to errors in subsequent runs if the variable has already been defined. Instead, use `var` to declare your variables to prevent these issues.
+- Refrain from using `process.exit()` in your code, as it will terminate the session and cause your request to time out.
+- If you're working with asynchronous code, make sure to add `$$.async()` at the beginning of your code and `setTimeout($$.done, timeOutInMilliSecond)` at the end. You can read more about `$$.async` and `$$.done` [here](https://n-riesco.github.io/ijavascript/doc/async.ipynb.html).
 
 ## Next Steps
 - [Creating a Custom container image using base BYOC container Image](../creating-container-image.md)
