@@ -1,0 +1,2 @@
+# sample requirements.txt file
+pillow==10.4.0

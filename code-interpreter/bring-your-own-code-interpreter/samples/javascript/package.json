@@ -1,0 +1,8 @@
+{
+  "name": "node-20-code-interpreter",
+  "description": "Node.js Code Interpreter",
+  "dependencies": {
+    "axios": "^1.7.2",
+    "node-fetch": "^3.3.2"
+  }
+}
