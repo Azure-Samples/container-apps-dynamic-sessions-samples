@@ -1,0 +1,7 @@
+fastapi==0.111.0
+azure-identity==1.16.0
+python-dotenv==1.0.1
+packaging==24.2
+autogen_agentchat==0.4.9.2
+autogen-ext[docker,openai]==0.4.9.2
+aiohttp==3.11.14
