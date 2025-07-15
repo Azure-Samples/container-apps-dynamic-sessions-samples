@@ -7,7 +7,7 @@ spec:
     logLevel: 1 # 0: debug, 1: info, 2: warn, 3: error
     useISO8601DateFormat: true
   kernel:
-    name: csharp # This should match with kernel name specified during Kernel installation in Dockerfile
+    name: .net-csharp # This should match with kernel name specified during Kernel installation in Dockerfile
     port: 6000
     isAsynchronousExecutionSupported: false
   healthProbe: # It will respond back /health endpoint with 200 status code if the container is healthy
@@ -21,10 +21,9 @@ spec:
   codeExecution:
     enableAutoBase64Decoding: false
     defaultTimeoutSeconds: 120
-    # Console.WriteLine does not work in csharp kernel and it is a known issue: https://github.com/zabirauf/icsharp?tab=readme-ov-file#known-issues
-    # synchronousExecution:
-    #   preCodeInjectionSnippet: Console.WriteLine("Synchronous Execution Started");
-    #   postCodeInjectionSnippet: Console.WriteLine("Synchronous Execution Completed");
+    synchronousExecution:
+       preCodeInjectionSnippet: Console.WriteLine("Synchronous Execution Started");
+       postCodeInjectionSnippet: Console.WriteLine("Synchronous Execution Completed");
   fileOperation:
     maxUploadFileSizeLimitInMBs: 250
     dataDirectoryPath : /mnt/data
