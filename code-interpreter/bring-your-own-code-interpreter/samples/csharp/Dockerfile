@@ -2,7 +2,7 @@
 # Jupyter kernel: https://github.com/dotnet/interactive
 
 # Pull latest base image from here https://mcr.microsoft.com/v2/k8se/services/codeinterpreter-base/tags/list
-FROM mcr.microsoft.com/k8se/services/codeinterpreter-base:0.0.3-ubuntu24.04
+FROM mcr.microsoft.com/k8se/services/codeinterpreter-base:0.0.7-ubuntu24.04
 
 # -------------------- [ Step-1 Complete OS package installations as root ] -------------------
 USER root
