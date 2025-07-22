@@ -11,7 +11,7 @@ To turn a Docker image you build on macOS (`arm64`) into an image that will run 
 
 ```bash
 # use --load instead of --push to get the image locally
-docker buildx --platform linux/amd64 -t reponame.azurecr.io/imagename:1.0.0 --push .
+docker buildx build --platform linux/amd64 -t reponame.azurecr.io/imagename:1.0.0 --push .
 ```
 
 ## Test
