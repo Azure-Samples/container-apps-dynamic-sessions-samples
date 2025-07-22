@@ -4,7 +4,7 @@ metadata:
   name: code-interpreter
 spec:
   logging:
-    logLevel: 0 # 0: debug, 1: info, 2: warn, 3: error
+    logLevel: 1 # 0: debug, 1: info, 2: warn, 3: error
     useISO8601DateFormat: true
   kernel:
     name: .net-csharp # This should match with kernel name specified during Kernel installation in Dockerfile
@@ -14,19 +14,19 @@ spec:
       endpoint: /health
       successfulHealthCheckThresholdSeconds: 120 # If no health check success in this time, then container will be considered as unhealthy
       initialDelaySeconds: 10                    # Time to wait before starting liveness checks
-      periodSeconds: 15                          # Time between code checks
+      periodSeconds: 30                          # Time between code checks
       timeoutSeconds: 15                         # Timeout for each code check
-      failureThreshold: 3                        # Number of failures before considering the container as failed
+      failureThreshold: 4                        # Number of failures before considering the container as failed
       code: Console.WriteLine("alive");
   codeExecution:
     enableAutoBase64Decoding: false
     defaultTimeoutSeconds: 120
-    synchronousExecution:
-       preCodeInjectionSnippet: Console.WriteLine("synchronous execution started");
-       postCodeInjectionSnippet: Console.WriteLine("synchronous execution done");
-    asynchronousExecution:
-      preCodeInjectionSnippet: await Task.Run(() => Console.WriteLine("asynchronous execution started"));
-      postCodeInjectionSnippet: await Task.Run(() => Console.WriteLine("asynchronous execution done"));
+    # synchronousExecution:
+    #    preCodeInjectionSnippet: Console.WriteLine("synchronous execution started");
+    #    postCodeInjectionSnippet: Console.WriteLine("synchronous execution done");
+    # asynchronousExecution:
+    #   preCodeInjectionSnippet: await Task.Run(() => Console.WriteLine("asynchronous execution started"));
+    #   postCodeInjectionSnippet: await Task.Run(() => Console.WriteLine("asynchronous execution done"));
   fileOperation:
     maxUploadFileSizeLimitInMBs: 250
     dataDirectoryPath : /mnt/data

@@ -1,0 +1,408 @@
+type: collection.insomnia.rest/5.0
+name: csharp-pool-tests
+meta:
+  id: wrk_d1913189f4dd43d988835a09df0def70
+  created: 1753218827158
+  modified: 1753218827158
+  description: ""
+collection:
+  - url: "{{ base }}/health"
+    name: Health Check
+    meta:
+      id: req_0b64acc119bb4e4fa9d90ca1ddede5b5
+      created: 1753141033224
+      modified: 1753209237121
+      isPrivate: false
+      description: ""
+      sortKey: -1753141297890
+    method: GET
+    parameters:
+      - name: identifier
+        value: "{{id}}"
+        disabled: false
+        id: pair_b6eaceb4d4e74ce0864eac4bae9bad61
+    headers:
+      - name: User-Agent
+        value: insomnia/11.3.0
+      - name: Authorization
+        value: Bearer {{ token }}
+    authentication:
+      type: none
+    scripts:
+      preRequest: ""
+      afterResponse: ""
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: "{{base}}/executions"
+    name: Create Execution Sync
+    meta:
+      id: req_e557bb9d66234348bd70acb87c56be50
+      created: 1753141297790
+      modified: 1753209175811
+      isPrivate: false
+      description: ""
+      sortKey: -1753141297790
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+        	"codeInputType": "Inline",
+        	"executionType": "Synchronous",
+        	"code": "Console.WriteLine(\"hello world from sync!\");",
+        	"timeoutInSeconds": 30
+        }
+    parameters:
+      - name: identifier
+        value: "{{id}}"
+        id: pair_8de4e49749be4a8e8d1adcd60f017b26
+      - name: api-version
+        value: "{{api}}"
+        disabled: false
+        id: pair_294aaa22479b4fe5beda7b60bd62c9ce
+    headers:
+      - name: Content-Type
+        value: application/json
+      - name: User-Agent
+        value: insomnia/11.3.0
+      - name: Authorization
+        value: Bearer {{ token }}
+    authentication:
+      type: none
+    scripts:
+      preRequest: ""
+      afterResponse: ""
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: "{{base}}/executions"
+    name: Create Execution Async
+    meta:
+      id: req_ffc8cf008f0c4a33a767c1d2ef2e3772
+      created: 1753142508790
+      modified: 1753217292606
+      isPrivate: false
+      description: ""
+      sortKey: -1753141165507
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+        	"codeInputType": "Inline",
+        	"executionType": "Asynchronous",
+        	"code": "await Task.Run(() => Console.WriteLine(\"hey async\"));",
+        	"timeoutInSeconds": 30
+        }
+    parameters:
+      - name: identifier
+        value: "{{id}}"
+      - name: api-version
+        value: "{{api}}"
+    headers:
+      - name: Content-Type
+        value: application/json
+      - name: User-Agent
+        value: insomnia/11.3.0
+      - name: Authorization
+        value: Bearer {{ token }}
+    authentication:
+      type: none
+    scripts:
+      preRequest: ""
+      afterResponse: |-
+        const jsonBody = insomnia.response.json();
+        insomnia.environment.set("executionId", jsonBody.id);
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: "{{base}}/executions/{{executionId}}"
+    name: Poll Execution
+    meta:
+      id: req_f6fbfaa682ed4a84980c918bd506034e
+      created: 1753207149912
+      modified: 1753217384531
+      isPrivate: false
+      description: ""
+      sortKey: -1753141165457
+    method: GET
+    body:
+      mimeType: application/json
+      text: >-
+        {
+            "properties": {
+                "codeInputType": "inline",
+                "executionType": "Asynchronous",
+                "code": "await Task.Run(() => Console.WriteLine(\"hey async\"));",
+        				"timeoutInSeconds": 30
+            }
+        }
+    parameters:
+      - name: identifier
+        value: "{{id}}"
+      - name: api-version
+        value: "{{api}}"
+    headers:
+      - name: Content-Type
+        value: application/json
+      - name: User-Agent
+        value: insomnia/11.3.0
+      - name: Authorization
+        value: Bearer {{ token }}
+    authentication:
+      type: none
+    scripts:
+      preRequest: >
+        if (!insomnia.environment.get('executionId')) {
+          throw new Error('executionId not set – run "Create Execution Async" first.');
+        }
+      afterResponse: ""
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: "{{base}}/files"
+    name: List Files
+    meta:
+      id: req_03b81501000e432cb4e394048b76bf1e
+      created: 1753209918558
+      modified: 1753211793065
+      isPrivate: false
+      description: ""
+      sortKey: -1753141165432
+    method: GET
+    parameters:
+      - name: identifier
+        value: "{{id}}"
+        disabled: false
+        id: pair_ad3f59b77a3f4eb58af6794bfc0ae9bd
+      - name: api-version
+        value: "{{api}}"
+        disabled: false
+        id: pair_3a56cd02c9104bfb9ff699330cdd38a8
+    headers:
+      - name: User-Agent
+        value: insomnia/11.3.0
+      - name: Authorization
+        value: Bearer {{ token }}
+    scripts:
+      preRequest: ""
+      afterResponse: ""
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: "{{base}}/files"
+    name: Post File
+    meta:
+      id: req_fb4f969b7cb24b44875935728260ea1d
+      created: 1753210167273
+      modified: 1753219338775
+      isPrivate: false
+      description: ""
+      sortKey: -1753141165407
+    method: POST
+    body:
+      mimeType: ""
+      text: "{{ mp_body }}"
+    parameters:
+      - name: identifier
+        value: "{{id}}"
+        disabled: false
+        id: pair_ad3f59b77a3f4eb58af6794bfc0ae9bd
+      - name: api-version
+        value: "{{api}}"
+        disabled: false
+        id: pair_3a56cd02c9104bfb9ff699330cdd38a8
+      - name: path
+        value: /
+        disabled: false
+        id: pair_2a6e90fc537b497aa9e171c851d35c33
+    headers:
+      - name: Content-Type
+        value: multipart/form-data; boundary={{ mp_boundary }}
+        id: pair_b6f55b8fc6c84d45a2164c53d7b97865
+      - name: User-Agent
+        value: insomnia/11.3.0
+        id: pair_e65a9d01018049ba8840905f54955394
+      - name: Authorization
+        value: Bearer {{ token }}
+        id: pair_0dde27baa3624541bfb6211ae562db57
+    scripts:
+      preRequest: >-
+        (function () {
+          var CRLF = '\r\n';
+
+          // Pull file content + name from env
+          var filename = insomnia.environment.get('sampleFileName') || 'sample.txt';
+          var content  = insomnia.environment.get('sampleTxt') || '';
+
+          // Any extra text fields you want in the form body
+          var extra = {
+            identifier: insomnia.environment.get('id') || 'test-session'
+            // path: '/',  // if your API wants it in body instead of query
+          };
+
+          // Build unique boundary
+          var boundary = '----mp-' + Date.now();
+
+          // Build body string
+          var body = '';
+          // file part
+          body += '--' + boundary + CRLF;
+          body += 'Content-Disposition: form-data; name="file"; filename="' + filename + '"' + CRLF;
+          body += 'Content-Type: text/plain' + CRLF + CRLF;
+          body += content + CRLF;
+
+          // extra fields
+          Object.keys(extra).forEach(function (k) {
+            body += '--' + boundary + CRLF;
+            body += 'Content-Disposition: form-data; name="' + k + '"' + CRLF + CRLF;
+            body += String(extra[k] || '') + CRLF;
+          });
+
+          // closing boundary
+          body += '--' + boundary + '--' + CRLF;
+
+          // Save to env
+          insomnia.environment.set('mp_boundary', boundary);
+          insomnia.environment.set('mp_body', body);
+        })();
+      afterResponse: |-
+        const jsonBody = insomnia.response.json();
+        insomnia.environment.set("fileName", jsonBody.name);
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: "{{base}}/files/{{ fileName}}"
+    name: Get File
+    meta:
+      id: req_6f7b31f800804b0d9244c1395a5a9dc2
+      created: 1753210751484
+      modified: 1753217479040
+      isPrivate: false
+      description: ""
+      sortKey: -1753141165207
+    method: GET
+    parameters:
+      - name: identifier
+        value: "{{id}}"
+        disabled: false
+        id: pair_ad3f59b77a3f4eb58af6794bfc0ae9bd
+      - name: api-version
+        value: "{{api}}"
+        disabled: false
+        id: pair_3a56cd02c9104bfb9ff699330cdd38a8
+    headers:
+      - name: User-Agent
+        value: insomnia/11.3.0
+      - name: Authorization
+        value: Bearer {{ token }}
+    scripts:
+      preRequest: |-
+        if (!insomnia.environment.get('fileName')) {
+          throw new Error('fileName not set – run "Post File" first.');
+        }
+      afterResponse: ""
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: "{{base}}/files/{{ fileName}}/content"
+    name: Get File Content
+    meta:
+      id: req_f49aa5a657b448cc9c5b33b6e84f62ac
+      created: 1753210921822
+      modified: 1753217506514
+      isPrivate: false
+      description: ""
+      sortKey: -1753141165157
+    method: GET
+    parameters:
+      - name: identifier
+        value: "{{id}}"
+        disabled: false
+        id: pair_ad3f59b77a3f4eb58af6794bfc0ae9bd
+      - name: api-version
+        value: "{{api}}"
+        disabled: false
+        id: pair_3a56cd02c9104bfb9ff699330cdd38a8
+    headers:
+      - name: User-Agent
+        value: insomnia/11.3.0
+      - name: Authorization
+        value: Bearer {{ token }}
+    scripts:
+      preRequest: |-
+        if (!insomnia.environment.get('fileName')) {
+          throw new Error('fileName not set – run "Post File" first.');
+        }
+      afterResponse: ""
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+cookieJar:
+  name: Default Jar
+  meta:
+    id: jar_86afc8ae7c524d808a6b88fae34b1507
+    created: 1753141033200
+    modified: 1753219361658
+environments:
+  name: Base Environment
+  meta:
+    id: env_4e8e78e467d14d9991b12e06b7ea81f8
+    created: 1753141033199
+    modified: 1753219361658
+    isPrivate: false
+  data:
+    base: http://localhost:6000
+    id: test-session
+    api: 2025-02-02-preview
+    token: not-needed-locally
+    sampleFileName: sample.txt
+    sampleTxt: |-
+      Line 1
+      Line 2
+      ...
+    executionId: ""
+    fileName: ""
+    mp_boundary: ""
+    mp_body: ""
