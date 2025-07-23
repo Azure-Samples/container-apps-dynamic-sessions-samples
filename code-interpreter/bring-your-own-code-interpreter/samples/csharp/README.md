@@ -29,3 +29,7 @@ docker buildx build --platform linux/amd64 -t reponame.azurecr.io/imagename:1.0.
    ```yaml
    base: http://localhost:6000   # your API base
    token: not-needed-locally     # or real token if running remotely in ACA Dynamic Sessions
+
+## Deploy
+
+.NET Interactive kernel supports asynchronous code execution. However, your custom container resource allocation should have at least 1 CPU core and 2 Gi of memory in order to avoid websocket connection issues between the BYOC REST API proxy and the kernel instances.
