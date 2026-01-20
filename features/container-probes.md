@@ -11,7 +11,7 @@ Container probes allow you to define health checks for your session containers, 
 
 The session pool will:
 
-- Ensure all ready session instances are healthy
+- Ensure all ready session instances are healthy based on the probes
 - Automatically remove any unhealthy session instances
 - Scale up to maintain the configured `readySessionInstances` count with healthy sessions
 
