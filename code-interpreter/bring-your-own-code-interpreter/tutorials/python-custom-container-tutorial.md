@@ -80,7 +80,7 @@ docker push docker.io/<your-docker-hub-username>/my-python-code-interpreter:0.0.
 
 To add more Python packages, update `requirements.txt` as needed. 
 
-If you have noticed that the Dockerfile starts with `FROM mcr.microsoft.com/k8se/services/codeinterpreter-base:0.0.3-ubuntu24.04`, extending the base BYOC container image.
+If you have noticed that the Dockerfile starts with `FROM mcr.microsoft.com/k8se/services/codeinterpreter:0.11.2-python3.12-base`, extending the base BYOC container image.
 
 👉 Assuming your published image is `docker.io/rajneeshmitharwal/my-python-code-interpreter:0.0.1`.
 
@@ -155,33 +155,32 @@ AUTH_HEADER="Authorization: Bearer $JWT_ACCESS_TOKEN"
 SESSION_POOL_MANAGEMENT_ENDPOINT=$(az containerapp sessionpool show -n $SESSION_POOL_NAME -g $RESOURCE_GROUP_NAME --query "properties.poolManagementEndpoint" -o tsv)
 ```
 
+### Available REST API Endpoints (Azure REST API Spec)
+
+The following table lists all REST API endpoints aligned with the Azure REST API spec, as implemented in the code interpreter service:
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/executions` | Execute code synchronously or asynchronously |
+| `GET` | `/executions/{executionId}` | Get results of an asynchronous execution |
+| `GET` | `/files` | List all files in the session |
+| `POST` | `/files` | Upload a file to the session |
+| `GET` | `/files/{filename}` | Get file metadata |
+| `GET` | `/files/{filename}/content` | Download file content |
+| `DELETE` | `/files/{filename}` | Delete a file from the session |
+
+All endpoints require the `identifier` query parameter to specify the session.
+
 ### Test the Setup with a Sample Code Execution
 
 Verify your setup by executing a simple code sample in the session pool.
 
 ```bash
-curl -v -X 'POST' -H "$AUTH_HEADER" "$SESSION_POOL_MANAGEMENT_ENDPOINT/executions?api-version=2024-10-02-preview&identifier=test" -H 'Content-Type: application/json' -d '
+curl -v -X 'POST' -H "$AUTH_HEADER" "$SESSION_POOL_MANAGEMENT_ENDPOINT/executions?identifier=test" -H 'Content-Type: application/json' -d '
 {
-    "code": "print(\"hello world\")"
+    "code": "print(\"hello world\")",
+    "timeoutInSeconds": 60
 }'
-```
-
-You should see `"status":"Succeeded"` and `"result.stdout"` with `"hello world\n"` as the output.
-
-From here on, we will use `session-test` as the [identifier](https://learn.microsoft.com/en-us/azure/container-apps/sessions-code-interpreter#session-identifiers) to ensure all operations are executed within the context of the `session-test` session.
-
-### 6. Upload a Sample Image to the Session
-
-#### Download a Sample Image or Use Your Own
-
-```bash
-curl -o sample.jpg "https://upload.wikimedia.org/wikipedia/commons/1/16/HDRI_Sample_Scene_Balls_%28JPEG-HDR%29.jpg"
-```
-
-#### Upload the Local File to the Session Using the Session File Upload API
-
-```bash
-curl -X POST -H "$AUTH_HEADER" -F file=@sample.jpg "$SESSION_POOL_MANAGEMENT_ENDPOINT/files?api-version=2024-10-02-preview&identifier=session-test"
 ```
 
 Sample Response:
@@ -189,65 +188,112 @@ Sample Response:
 ```json
 HTTP 200 OK
 {
-  "name": "sample.jpg",
-  "sizeInBytes": 146534,
-  "lastModifiedAt": "2024-11-03T06:59:11.815973172Z",
-  "contentType": "image/jpeg",
-  "type": "File"
+  "id": "<execution-id>",
+  "identifier": "test",
+  "executionType": "synchronous",
+  "status": "Succeeded",
+  "result": {
+    "stdout": "hello world\n",
+    "stderr": "",
+    "executionResult": null,
+    "executionTimeInMilliseconds": 15
+  }
 }
 ```
 
-### 7. Crop the Uploaded Image Using the Session Code Execution API
+From here on, we will use `session-test` as the [identifier](https://learn.microsoft.com/en-us/azure/container-apps/sessions-code-interpreter#session-identifiers) to ensure all operations are executed within the context of the `session-test` session.
+
+## 6. Upload a Sample Image to the Session
+
+### Download a Sample Image or Use Your Own
 
 ```bash
-curl -v -X POST -H "$AUTH_HEADER" "$SESSION_POOL_MANAGEMENT_ENDPOINT/executions?api-version=2024-10-02-preview&identifier=session-test" -H 'Content-Type: application/json' -d '
+curl -o sample.jpg "https://upload.wikimedia.org/wikipedia/commons/1/16/HDRI_Sample_Scene_Balls_%28JPEG-HDR%29.jpg"
+```
+
+### Upload the Local File to the Session Using the Session File Upload API
+
+```bash
+curl -X POST -H "$AUTH_HEADER" -F file=@sample.jpg "$SESSION_POOL_MANAGEMENT_ENDPOINT/files?identifier=session-test"
+```
+
+Sample Response:
+
+```json
+HTTP 200 OK
+[
+  {
+    "name": "sample.jpg",
+    "type": "file",
+    "sizeInBytes": 146534,
+    "lastModifiedAt": "2024-11-03T06:59:11Z",
+    "directory": ".",
+    "contentType": "image/jpeg"
+  }
+]
+```
+
+### List Files in the Session to Verify Upload
+
+Use the `GET /files` endpoint to list all files in the session and confirm the upload was successful:
+
+```bash
+curl -X GET -H "$AUTH_HEADER" "$SESSION_POOL_MANAGEMENT_ENDPOINT/files?identifier=session-test"
+```
+
+Sample Response:
+
+```json
+HTTP 200 OK
+[
+  {
+    "name": "sample.jpg",
+    "type": "file",
+    "sizeInBytes": 146534,
+    "lastModifiedAt": "2024-11-03T06:59:11Z",
+    "directory": ".",
+    "contentType": "image/jpeg"
+  }
+]
+```
+
+## 7. Crop the Uploaded Image Using the Session Code Execution API
+
+```bash
+curl -v -X POST -H "$AUTH_HEADER" "$SESSION_POOL_MANAGEMENT_ENDPOINT/executions?identifier=session-test" -H 'Content-Type: application/json' -d '
 {
     "code": "from PIL import Image\nImage.open(\"/mnt/data/sample.jpg\").crop((100, 100, 400, 400)).save(\"/mnt/data/cropped_sample.jpg\")",
-    "executionType": "Synchronous"
+    "executionType": "synchronous",
+    "timeoutInSeconds": 60
 }'
 ```
 
 Sample Response:
 
 ```json
-HTTP 202 Accepted
+HTTP 200 OK
 {
   "id": "ae2e682e-3690-4df2-bd6e-536b06afd1d6",
   "identifier": "session-test",
-  "sessionId": "session-test",
-  "executionType": "Synchronous",
+  "executionType": "synchronous",
   "status": "Succeeded",
   "result": {
     "stdout": "",
     "stderr": "",
-    "executionResult": "",
+    "executionResult": null,
     "executionTimeInMilliseconds": 16
-  },
-  "rawResult": {
-    "hresult": 0,
-    "result": "",
-    "error_name": "",
-    "error_message": "",
-    "error_stack_trace": "",
-    "stdout": "",
-    "stderr": "",
-    "diagnosticInfo": {
-      "executionRequestTimeInMilliSeconds": 16,
-      "executionProcessResponseTimeInMilliSeconds": 0,
-      "executionDuration": 16,
-      "identifier": "session-test"
-    },
-    "operationId": "ae2e682e-3690-4df2-bd6e-536b06afd1d6"
   }
 }
 ```
 
-### 8. Download the Cropped File Using the Session File Download API
+## 8. Download the Cropped File Using the Session File Download API
+
+### Check File Metadata
 
 To check if `cropped_sample.jpg` exists, use the session's file metadata API call:
 
 ```bash
-curl -X GET -H "$AUTH_HEADER" "$SESSION_POOL_MANAGEMENT_ENDPOINT/files/cropped_sample.jpg?api-version=2024-10-02-preview&identifier=session-test" 
+curl -X GET -H "$AUTH_HEADER" "$SESSION_POOL_MANAGEMENT_ENDPOINT/files/cropped_sample.jpg?identifier=session-test" 
 ```
 
 Sample Response:
@@ -256,22 +302,92 @@ Sample Response:
 HTTP 200 OK
 {
   "name": "cropped_sample.jpg",
+  "type": "file",
   "sizeInBytes": 10969,
-  "lastModifiedAt": "2024-11-03T07:06:25.079495309Z",
-  "contentType": "image/jpeg",
-  "type": "File"
+  "lastModifiedAt": "2024-11-03T07:06:25Z",
+  "directory": ".",
+  "contentType": "image/jpeg"
 }
 ```
+
+### Download File Content
 
 To download the actual file content, use the session's file download API call:
 
 ```bash
-curl -X GET -H "$AUTH_HEADER" "$SESSION_POOL_MANAGEMENT_ENDPOINT/files/cropped_sample.jpg/content?api-version=2024-10-02-preview&identifier=session-test" -o cropped_sample.jpg
+curl -X GET -H "$AUTH_HEADER" "$SESSION_POOL_MANAGEMENT_ENDPOINT/files/cropped_sample.jpg/content?identifier=session-test" -o cropped_sample.jpg
 ```
 
 The file `cropped_sample.jpg` on your local storage is the cropped image processed by the Custom Container-based Dynamic Session Pool.
 
-### 9. Cleanup
+## 9. Delete a File from the Session
+
+Use `DELETE /files/{filename}` to remove a file from the session:
+
+```bash
+curl -X DELETE -H "$AUTH_HEADER" "$SESSION_POOL_MANAGEMENT_ENDPOINT/files/cropped_sample.jpg?identifier=session-test"
+```
+
+Sample Response:
+
+```
+HTTP 204 No Content
+```
+
+## 10. Asynchronous Code Execution and Getting Results
+
+You can also execute code asynchronously by setting `executionType` to `asynchronous`. The API returns immediately with an execution ID that you can use to poll for results.
+
+### Submit an Asynchronous Execution
+
+```bash
+curl -v -X POST -H "$AUTH_HEADER" "$SESSION_POOL_MANAGEMENT_ENDPOINT/executions?identifier=session-test" -H 'Content-Type: application/json' -d '
+{
+    "code": "import time\ntime.sleep(2)\nprint(\"async task completed\")",
+    "executionType": "asynchronous",
+    "timeoutInSeconds": 60
+}'
+```
+
+Sample Response:
+
+```json
+HTTP 200 OK
+{
+  "id": "b3e4f5a6-7890-4abc-def1-234567890abc",
+  "identifier": "session-test",
+  "executionType": "asynchronous",
+  "status": "NotStarted"
+}
+```
+
+### Get Async Execution Results
+
+Use the execution ID from the response to retrieve the results via `GET /executions/{executionId}`:
+
+```bash
+curl -X GET -H "$AUTH_HEADER" "$SESSION_POOL_MANAGEMENT_ENDPOINT/executions/b3e4f5a6-7890-4abc-def1-234567890abc?identifier=session-test"
+```
+
+Sample Response:
+
+```json
+HTTP 200 OK
+{
+  "id": "b3e4f5a6-7890-4abc-def1-234567890abc",
+  "identifier": "session-test",
+  "executionType": "asynchronous",
+  "status": "Succeeded",
+  "result": {
+    "stdout": "async task completed\n",
+    "stderr": "",
+    "executionResult": null,
+    "executionTimeInMilliseconds": 2015
+  }
+}
+```
+
+## 11. Cleanup
 
 This command will remove the specified resource group along with all resources created during this tutorial.
 
