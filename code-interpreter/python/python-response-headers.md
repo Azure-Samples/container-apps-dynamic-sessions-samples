@@ -2,9 +2,9 @@
 
 When executing code using **Python code interpreter sessions** in Azure Container Apps dynamic sessions, the service returns additional HTTP response headers that provide **informational execution timing and session metadata** that can help you understand how a code execution request was processed by the service.
 
-> > **Note**
-> >
-> > These headers are returned **only** for Python code interpreter execution requests. They are not returned for file operations, session deletion, or custom container sessions.
+> **Note**
+>
+> These headers are returned **only** for Python code interpreter execution requests. They are not returned for file operations, session deletion, or custom container sessions.
 
 ---
 
