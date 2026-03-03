@@ -6,10 +6,4 @@ Beginning with version `2024-10-02-preview`, the API contract has undergone sign
 
 For the Code Interpreter Dynamic Sessions pool, API responses are further enriched with additional information, such as headers indicating concurrent session execution details. This added information may not be present in Custom Container-based Dynamic Sessions, though the high-level structure remains similar.
 
-You can also find the latest APIs Swagger definitions [here](https://github.com/Azure/azure-rest-api-specs/tree/main/specification/app/data-plane/Microsoft.App.DynamicSessions)
-
-# Samples
-
-- [API version '2024-08-02-preview' and before](./2024-08-02-preview-and-before.md)
-- [API version '2024-10-02-preview' and after](./2024-10-02-preview-and-after.md)
-
+You can also find the latest APIs Swagger definitions [here](https://github.com/Azure/azure-rest-api-specs/blob/main/specification/app/data-plane/DynamicSessions/preview/2025-10-02-preview/DynamicSessions.json)
