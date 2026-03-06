@@ -24,3 +24,7 @@ import pkg_resources
 ```python
 !pip install pillow
 ```
+
+## See also
+
+- [Python response headers](python-response-headers.md)
