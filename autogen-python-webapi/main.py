@@ -1,5 +1,6 @@
 import os
 import re
+import uuid
 
 import dotenv
 from fastapi import FastAPI, HTTPException
@@ -14,7 +15,7 @@ app = FastAPI()
 # Load autogen agent configurations from a JSON configuration list
 config_list = config_list_from_json(
     "OAI_CONFIG_LIST",
-    filter_dict={"model": ["gpt-4"]}
+    filter_dict={"model": ["gpt-4.1-mini"]}
 )
 
 # Initialize the ConversableAgent for writing code
@@ -25,18 +26,30 @@ code_writer_agent = ConversableAgent(
     is_termination_msg=lambda msg: "code output" in msg["content"]
 )
 
+# PyAutoGen 0.2.27 strips periods from Azure deployment names.
+azure_openai_client = code_writer_agent.client._clients[0]._oai_client
+deployment_name = config_list[0]["model"]
+azure_openai_client._azure_deployment = deployment_name
+azure_openai_client.base_url = (
+    f"{config_list[0]['base_url'].rstrip('/')}/openai/deployments/{deployment_name}/"
+)
+
 # Endpoint for ACA session management, fetched from environment variables
 aca_pool_management_endpoint = os.getenv("POOL_MANAGEMENT_ENDPOINT")
-aca_sessions_executor = ACASessionsExecutor(aca_pool_management_endpoint)
 
-# Initialize the CodeExecutor agent
-code_executor_agent = ConversableAgent(
-    name="CodeExecutor",
-    llm_config=False,
-    code_execution_config={"executor": aca_sessions_executor},
-    human_input_mode="NEVER",
-    is_termination_msg=lambda msg: "TERMINATE" in msg.get("content", "").strip().upper()
-)
+
+def create_code_executor_agent(session_identifier: str) -> ConversableAgent:
+    aca_sessions_executor = ACASessionsExecutor(
+        aca_pool_management_endpoint,
+        session_identifier=session_identifier,
+    )
+    return ConversableAgent(
+        name="CodeExecutor",
+        llm_config=False,
+        code_execution_config={"executor": aca_sessions_executor},
+        human_input_mode="NEVER",
+        is_termination_msg=lambda msg: "TERMINATE" in msg.get("content", "").strip().upper()
+    )
 
 
 @app.get("/")
@@ -47,6 +60,8 @@ async def root():
 @app.get("/chat")
 async def chat(message: str):
     try:
+        session_identifier = str(uuid.uuid4())
+        code_executor_agent = create_code_executor_agent(session_identifier)
         # Initiating chat between CodeExecutor and CodeWriter with the provided message
         chat_result = code_executor_agent.initiate_chat(
             code_writer_agent,

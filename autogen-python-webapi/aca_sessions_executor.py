@@ -9,14 +9,17 @@ class ACASessionsExecutor(CodeExecutor):
     def code_extractor(self) -> CodeExtractor:
         return MarkdownCodeExtractor()
 
-    def __init__(self, pool_management_endpoint: str) -> None:
+    def __init__(self, pool_management_endpoint: str, session_identifier: str) -> None:
         self.pool_management_endpoint = pool_management_endpoint
+        self.session_identifier = session_identifier
         self.access_token = None
 
     def ensure_access_token(self) -> None:
         if not self.access_token:
-            credential = DefaultAzureCredential()
-            scope = "https://dynamicsessions.io"
+            credential = DefaultAzureCredential(
+                exclude_shared_token_cache_credential=True
+            )
+            scope = "https://dynamicsessions.io/.default"
             self.access_token = credential.get_token(scope).token
 
     def execute_code_blocks(self, code_blocks: List[CodeBlock]) -> CodeResult:
@@ -29,7 +32,7 @@ class ACASessionsExecutor(CodeExecutor):
 
         for code_block in code_blocks:
             properties = {
-                "identifier": "adslfjlad",
+                "identifier": self.session_identifier,
                 "codeInputType": "inline",
                 "executionType": "synchronous",
                 "pythonCode": code_block.code,
