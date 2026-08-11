@@ -1,9 +1,11 @@
 import os
 import re
+import uuid
 
 import dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse, RedirectResponse
+from pydantic import BaseModel
 from autogen import ConversableAgent, config_list_from_json
 from aca_sessions_executor import ACASessionsExecutor
 
@@ -14,29 +16,15 @@ app = FastAPI()
 # Load autogen agent configurations from a JSON configuration list
 config_list = config_list_from_json(
     "OAI_CONFIG_LIST",
-    filter_dict={"model": ["gpt-4"]}
-)
-
-# Initialize the ConversableAgent for writing code
-code_writer_agent = ConversableAgent(
-    name="CodeWriter",
-    system_message="You are a helpful AI assistant. You use your coding skill to solve problems. You have access to an IPython kernel to execute Python code. You output only valid python code. This valid code will be executed in a sandbox, resulting in result, stdout, or stderr. All necessary libraries have already been installed. Once the task is done, returns 'TERMINATE'.",
-    llm_config={"config_list": config_list},
-    is_termination_msg=lambda msg: "code output" in msg["content"]
+    filter_dict={"model": ["gpt-4.1-mini"]}
 )
 
 # Endpoint for ACA session management, fetched from environment variables
 aca_pool_management_endpoint = os.getenv("POOL_MANAGEMENT_ENDPOINT")
-aca_sessions_executor = ACASessionsExecutor(aca_pool_management_endpoint)
 
-# Initialize the CodeExecutor agent
-code_executor_agent = ConversableAgent(
-    name="CodeExecutor",
-    llm_config=False,
-    code_execution_config={"executor": aca_sessions_executor},
-    human_input_mode="NEVER",
-    is_termination_msg=lambda msg: "TERMINATE" in msg.get("content", "").strip().upper()
-)
+
+class ChatRequest(BaseModel):
+    message: str
 
 
 @app.get("/")
@@ -44,13 +32,41 @@ async def root():
     return RedirectResponse("/docs")
 
 
-@app.get("/chat")
-async def chat(message: str):
+@app.post("/chat")
+async def chat(request: ChatRequest):
     try:
+        # Initialize the ConversableAgent for writing code
+        code_writer_agent = ConversableAgent(
+            name="CodeWriter",
+            system_message="You are a helpful AI assistant. You use your coding skill to solve problems. You have access to an IPython kernel to execute Python code. You output only valid python code. This valid code will be executed in a sandbox, resulting in result, stdout, or stderr. All necessary libraries have already been installed. Once the task is done, returns 'TERMINATE'.",
+            llm_config={"config_list": config_list},
+            is_termination_msg=lambda msg: "code output" in msg["content"]
+        )
+
+        # PyAutoGen 0.2.27 strips periods from Azure deployment names.
+        azure_openai_client = code_writer_agent.client._clients[0]._oai_client
+        deployment_name = config_list[0]["model"]
+        azure_openai_client._azure_deployment = deployment_name
+        azure_openai_client.base_url = (
+            f"{config_list[0]['base_url'].rstrip('/')}/openai/deployments/{deployment_name}/"
+        )
+
+        session_identifier = str(uuid.uuid4())
+        aca_sessions_executor = ACASessionsExecutor(
+            aca_pool_management_endpoint,
+            session_identifier=session_identifier,
+        )
+        code_executor_agent = ConversableAgent(
+            name="CodeExecutor",
+            llm_config=False,
+            code_execution_config={"executor": aca_sessions_executor},
+            human_input_mode="NEVER",
+            is_termination_msg=lambda msg: "TERMINATE" in msg.get("content", "").strip().upper()
+        )
         # Initiating chat between CodeExecutor and CodeWriter with the provided message
         chat_result = code_executor_agent.initiate_chat(
             code_writer_agent,
-            message=message
+            message=request.message
         )
         # Find the last message containing 'Code output:' from assistant
         code_output_message = None

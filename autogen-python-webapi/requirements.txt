@@ -1,4 +1,6 @@
 fastapi==0.111.0
-azure-identity==1.16.0
+fastapi-cli==0.0.8
+azure-identity==1.25.3
 python-dotenv==1.0.1
 pyautogen==0.2.27
+packaging==24.1
