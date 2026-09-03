@@ -5,26 +5,40 @@ metadata:
 spec:
   logging:
     logLevel: 1 # 0: debug, 1: info, 2: warn, 3: error
-    useISO8601DateFormat: true
+    useISO8601DateFormat: false
   kernel:
+    enabled: true
+    isFirstParty: true
     name: python3 # This should match with kernel name specified during Kernel installation in Dockerfile
     port: 6000
-    isAsynchronousExecutionSupported: true
+    runInitScript: true
+    kernelInit:
+      synchronous:
+        enabled: true
+        initCommonLibraries: true
+        initialDelaySeconds: 2
+        periodSeconds: 1
+      synchronousWithEmptyKernel:
+        enabled: true
+        initCommonLibraries: false
+        initialDelaySeconds: 2
+        periodSeconds: 1
+      asynchronous:
+        enabled: true
+        initCommonLibraries: true
+        initialDelaySeconds: 2
+        periodSeconds: 1
+        initLibrariesFile: "/app/scripts/initialize_libraries_async.py"
   healthProbe: # It will respond back /health endpoint with 200 status code if the container is healthy
-    endpoint: /health
-    successfulHealthCheckThresholdSeconds: 120 # If no health check success in this time, then container will be considered as unhealthy
-    initialDelaySeconds: 10 # Time to wait before starting liveness checks (seconds)
-    periodSeconds: 15 # Time between code checks (seconds)
-    timeoutSeconds: 15 # Timeout for each code check (seconds)
-    failureThreshold: 3 # Number of failures before considering the container as failed
+    initialDelaySeconds: 0
     code: 1+1
+    expectedResult: 2
+    commonLibrariesInitTimeoutSeconds: 90
+    tikaServer:
+      enabled: false
   codeExecution:
-    enableAutoBase64Decoding: false
-    defaultTimeoutSeconds: 120
-    asynchronousExecution:
-      preCodeInjectionSnippet: |
-        import nest_asyncio
-        nest_asyncio.apply()
+    enableAutoBase64Decoding: true
   fileOperation:
     maxUploadFileSizeLimitInMBs: 250
-    dataDirectoryPath: /mnt/data
+    enableFullPathAccess: false
+  initLibrariesFile: "/app/scripts/initialize_libraries.py"

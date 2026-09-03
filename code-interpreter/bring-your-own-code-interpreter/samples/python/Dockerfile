@@ -1,5 +1,5 @@
-# Pull latest base image from here https://mcr.microsoft.com/v2/k8se/services/codeinterpreter-base/tags/list
-FROM mcr.microsoft.com/k8se/services/codeinterpreter-base:0.0.3-ubuntu24.04
+# Use the runnable Python base image, which includes the BYOC proxy and entrypoint.
+FROM mcr.microsoft.com/k8se/services/codeinterpreter-base:0.13.8-python3.12-base
 
 # -------------------- [ Step-1 Complete OS package installations as root ] -------------------
 # No additional packages required for this as of now
