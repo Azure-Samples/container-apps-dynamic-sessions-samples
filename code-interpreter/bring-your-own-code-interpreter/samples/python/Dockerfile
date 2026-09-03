@@ -1,4 +1,4 @@
-# Use the latest Python Code Inbterpreter base image from https://mcr.microsoft.com/v2/k8se/services/codeinterpreter-base/tags/list 
+# Use the latest Python Code Interpreter base image from https://mcr.microsoft.com/v2/k8se/services/codeinterpreter-base/tags/list 
 # The versioning convention is <code-interpreter-version>-python<python-version>-base.  
 # This image includes the BYOC proxy and entrypoint.
 # Update the <code-interpreter-version> and <python-version> below accordingly
