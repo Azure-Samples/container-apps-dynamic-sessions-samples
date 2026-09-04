@@ -1,5 +1,8 @@
-# Use the runnable Python base image, which includes the BYOC proxy and entrypoint.
-FROM mcr.microsoft.com/k8se/services/codeinterpreter-base:0.13.8-python3.12-base
+# Use the latest Python Code Interpreter base image from https://mcr.microsoft.com/v2/k8se/services/codeinterpreter-base/tags/list 
+# The versioning convention is <code-interpreter-version>-python<python-version>-base.  
+# This image includes the BYOC proxy and entrypoint.
+# Update the <code-interpreter-version> and <python-version> below accordingly
+FROM mcr.microsoft.com/k8se/services/codeinterpreter-base:<code-interpreter-version>-python<python-version>-base
 
 # -------------------- [ Step-1 Complete OS package installations as root ] -------------------
 # No additional packages required for this as of now
