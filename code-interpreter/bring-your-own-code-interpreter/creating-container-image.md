@@ -47,13 +47,16 @@ spec:
 
 ## Extending the Base BYOC Container Image
 
-To create a custom container image, extend the latest BYOC base image. Details about the base image are available [here](./README.md#base-byoc-container-image).
+To create a custom container image, extend the available BYOC base image. Details about the base image are available [here](./README.md#base-byoc-container-image).
 
-To pull the [latest](https://mcr.microsoft.com/v2/k8se/services/codeinterpreter-base/tags/list) base image, use:
+Pull the [available](https://mcr.microsoft.com/v2/k8se/services/codeinterpreter-base/tags/list) base image, based on your needs. The versioning convention is `<code-interpreter-version>-python<python-version>-base` - for example - 
 
 ```dockerfile
-FROM mcr.microsoft.com/k8se/services/codeinterpreter-base:0.0.3-ubuntu24.04
+FROM mcr.microsoft.com/k8se/services/codeinterpreter-base:<code-interpreter-version>-python<python-version>-base
 ```
+
+> [!IMPORTANT]
+> These container images are provided as sample or reference artifacts to help get started. They are provided "as is" without guarantees of availability, updates, security patches, compatibility, or ongoing maintenance. Microsoft does not provide support for issues arising from the use of these images. Customers are responsible for validating, securing, and maintaining any images used in their environments.
 
 Organize your Dockerfile into three main sections for easier debugging and maintenance:
 
