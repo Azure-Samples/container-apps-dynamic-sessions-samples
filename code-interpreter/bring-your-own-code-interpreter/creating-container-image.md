@@ -112,4 +112,4 @@ curl -v http://localhost:6000/health
 
 - Logs showing health check times (`Healthcheck execution time: ...`) help verify configuration.
 - Running locally emulates single-session execution, so REST API requests will land on one container regardless of the `identifier` query parameter. Each subsequent code execution may affect the state; e.g., if you declare `const foo = 1;` in one session, you cannot redeclare `foo` in a new session without restarting the container. To test ephemeral sessions, restart the container to get a fresh state, similar to a Dynamic Sessions pool setup.
-- Pay close attention to log messages, as they provide valuable insights into execution behavior. The logs are designed to be self-explanatory and organized by appropriate log levels for easy interpretation.
+- Pay close attention to log messages as they provide valuable insights into execution behavior. The logs are designed to be self-explanatory and organized by appropriate log levels for easy interpretation.
