@@ -47,13 +47,16 @@ spec:
 
 ## Extending the Base BYOC Container Image
 
-To create a custom container image, extend the latest BYOC base image. Details about the base image are available [here](./README.md#base-byoc-container-image).
+To create a custom container image, extend the available BYOC base image. Details about the base image are available [here](./README.md#base-byoc-container-image).
 
-To pull the [latest](https://mcr.microsoft.com/v2/k8se/services/codeinterpreter-base/tags/list) base image, use:
+Pull the [available](https://mcr.microsoft.com/v2/k8se/services/codeinterpreter-base/tags/list) base image, based on your needs. The versioning convention is `<CODE_INTERPRETER_VERSION>-python<PYTHON_VERSION>-base`. For example: 
 
 ```dockerfile
-FROM mcr.microsoft.com/k8se/services/codeinterpreter-base:0.0.3-ubuntu24.04
+FROM mcr.microsoft.com/k8se/services/codeinterpreter-base:<CODE_INTERPRETER_VERSION>-python<PYTHON_VERSION>-base
 ```
+
+> [!IMPORTANT]
+> The container images in this sample are provided "as is" as reference artifacts without guarantees of availability, updates, security patches, compatibility, or ongoing maintenance. Microsoft does not provide support for issues arising from the use of these images. You are responsible for validating, securing, and maintaining any images used in your environment.
 
 Organize your Dockerfile into three main sections for easier debugging and maintenance:
 
@@ -109,4 +112,4 @@ curl -v http://localhost:6000/health
 
 - Logs showing health check times (`Healthcheck execution time: ...`) help verify configuration.
 - Running locally emulates single-session execution, so REST API requests will land on one container regardless of the `identifier` query parameter. Each subsequent code execution may affect the state; e.g., if you declare `const foo = 1;` in one session, you cannot redeclare `foo` in a new session without restarting the container. To test ephemeral sessions, restart the container to get a fresh state, similar to a Dynamic Sessions pool setup.
-- Pay close attention to log messages, as they provide valuable insights into execution behavior. The logs are designed to be self-explanatory and organized by appropriate log levels for easy interpretation.
+- Pay close attention to log messages as they provide valuable insights into execution behavior. The logs are designed to be self-explanatory and organized by appropriate log levels for easy interpretation.
