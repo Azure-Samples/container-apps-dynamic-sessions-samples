@@ -52,7 +52,7 @@ To create a custom container image, extend the available BYOC base image. Detail
 Pull the [available](https://mcr.microsoft.com/v2/k8se/services/codeinterpreter-base/tags/list) base image, based on your needs. The versioning convention is `<CODE_INTERPRETER_VERSION>-python<PYTHON_VERSION>-base`. For example: 
 
 ```dockerfile
-FROM mcr.microsoft.com/k8se/services/codeinterpreter-base:<code-interpreter-version>-python<python-version>-base
+FROM mcr.microsoft.com/k8se/services/codeinterpreter-base:<CODE_INTERPRETER_VERSION>-python<PYTHON_VERSION>-base
 ```
 
 > [!IMPORTANT]
