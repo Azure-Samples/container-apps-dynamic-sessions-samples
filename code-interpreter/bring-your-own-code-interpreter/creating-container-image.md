@@ -56,7 +56,7 @@ FROM mcr.microsoft.com/k8se/services/codeinterpreter-base:<CODE_INTERPRETER_VERS
 ```
 
 > [!IMPORTANT]
-> These container images are provided as sample or reference artifacts to help get started. They are provided "as is" without guarantees of availability, updates, security patches, compatibility, or ongoing maintenance. Microsoft does not provide support for issues arising from the use of these images. Customers are responsible for validating, securing, and maintaining any images used in their environments.
+> The container images in this sample are provided "as is" as reference artifacts without guarantees of availability, updates, security patches, compatibility, or ongoing maintenance. Microsoft does not provide support for issues arising from the use of these images. You are responsible for validating, securing, and maintaining any images used in your environment.
 
 Organize your Dockerfile into three main sections for easier debugging and maintenance:
 
