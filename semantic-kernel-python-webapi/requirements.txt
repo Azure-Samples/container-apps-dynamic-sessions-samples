@@ -1,4 +1,4 @@
 fastapi==0.111.0
 azure-identity==1.16.0
 python-dotenv==1.0.1
-semantic-kernel==0.9.8b1
+semantic-kernel==1.32.1
