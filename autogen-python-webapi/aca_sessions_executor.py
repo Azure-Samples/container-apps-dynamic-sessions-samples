@@ -1,4 +1,5 @@
 import requests
+from datetime import datetime, timedelta, timezone
 from typing import List
 from azure.identity import DefaultAzureCredential
 from autogen.coding import CodeBlock, CodeExecutor, CodeExtractor, CodeResult, MarkdownCodeExtractor
@@ -9,15 +10,26 @@ class ACASessionsExecutor(CodeExecutor):
     def code_extractor(self) -> CodeExtractor:
         return MarkdownCodeExtractor()
 
-    def __init__(self, pool_management_endpoint: str) -> None:
+    def __init__(self, pool_management_endpoint: str, session_identifier: str) -> None:
         self.pool_management_endpoint = pool_management_endpoint
+        self.session_identifier = session_identifier
         self.access_token = None
+        self.access_token_expires_on = None
 
     def ensure_access_token(self) -> None:
-        if not self.access_token:
-            credential = DefaultAzureCredential()
-            scope = "https://dynamicsessions.io"
-            self.access_token = credential.get_token(scope).token
+        refresh_before = datetime.now(timezone.utc) + timedelta(minutes=5)
+        if (
+            not self.access_token
+            or not self.access_token_expires_on
+            or datetime.fromtimestamp(self.access_token_expires_on, timezone.utc) < refresh_before
+        ):
+            credential = DefaultAzureCredential(
+                exclude_shared_token_cache_credential=True
+            )
+            scope = "https://dynamicsessions.io/.default"
+            access_token = credential.get_token(scope)
+            self.access_token = access_token.token
+            self.access_token_expires_on = access_token.expires_on
 
     def execute_code_blocks(self, code_blocks: List[CodeBlock]) -> CodeResult:
         self.ensure_access_token()
@@ -29,7 +41,7 @@ class ACASessionsExecutor(CodeExecutor):
 
         for code_block in code_blocks:
             properties = {
-                "identifier": "adslfjlad",
+                "identifier": self.session_identifier,
                 "codeInputType": "inline",
                 "executionType": "synchronous",
                 "pythonCode": code_block.code,
