@@ -7,8 +7,8 @@ from azure.identity import DefaultAzureCredential
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 from semantic_kernel import Kernel
-from semantic_kernel.connectors.ai.function_call_behavior import \
-    FunctionCallBehavior
+from semantic_kernel.connectors.ai.function_choice_behavior import \
+    FunctionChoiceBehavior
 from semantic_kernel.connectors.ai.open_ai.prompt_execution_settings.azure_chat_prompt_execution_settings import \
     AzureChatPromptExecutionSettings
 from semantic_kernel.connectors.ai.open_ai.services.azure_chat_completion import \
@@ -72,8 +72,8 @@ async def chat(message: str):
     kernel.add_service(chat_service)
 
     sessions_tool = SessionsPythonTool(
-        pool_management_endpoint,
         auth_callback=auth_callback_factory("https://dynamicsessions.io/.default"),
+        pool_management_endpoint=pool_management_endpoint,
     )
     kernel.add_plugin(sessions_tool, "SessionsTool")
 
@@ -86,7 +86,7 @@ async def chat(message: str):
     req_settings = AzureChatPromptExecutionSettings(service_id=service_id, tool_choice="auto")
 
     filter = {"excluded_plugins": ["ChatBot"]}
-    req_settings.function_call_behavior = FunctionCallBehavior.EnableFunctions(auto_invoke=True, filters=filter)
+    req_settings.function_choice_behavior = FunctionChoiceBehavior.Auto(auto_invoke=True, filters=filter)
 
     arguments = KernelArguments(settings=req_settings)
 
