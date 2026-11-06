@@ -7,8 +7,8 @@ from azure.identity import DefaultAzureCredential
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 from semantic_kernel import Kernel
-from semantic_kernel.connectors.ai.function_call_behavior import \
-    FunctionCallBehavior
+from semantic_kernel.connectors.ai.function_choice_behavior import \
+    FunctionChoiceBehavior
 from semantic_kernel.connectors.ai.open_ai.prompt_execution_settings.azure_chat_prompt_execution_settings import \
     AzureChatPromptExecutionSettings
 from semantic_kernel.connectors.ai.open_ai.services.azure_chat_completion import \
@@ -72,7 +72,7 @@ async def chat(message: str):
     kernel.add_service(chat_service)
 
     sessions_tool = SessionsPythonTool(
-        pool_management_endpoint,
+        pool_management_endpoint=pool_management_endpoint,
         auth_callback=auth_callback_factory("https://dynamicsessions.io/.default"),
     )
     kernel.add_plugin(sessions_tool, "SessionsTool")
@@ -86,7 +86,44 @@ async def chat(message: str):
     req_settings = AzureChatPromptExecutionSettings(service_id=service_id, tool_choice="auto")
 
     filter = {"excluded_plugins": ["ChatBot"]}
-    req_settings.function_call_behavior = FunctionCallBehavior.EnableFunctions(auto_invoke=True, filters=filter)
+    # Configure function/tool choice behavior for the kernel and req_settings
+    python_to_json_schema_type = {
+        "str": "string",
+        "int": "integer",
+        "float": "number",
+        "bool": "boolean",
+        "list": "array",
+        "dict": "object",
+    }
+    FunctionChoiceBehavior.Auto(auto_invoke=True, filters=filter).configure(
+        kernel,
+        lambda config, settings, type_: setattr(
+            settings,
+            "tools",
+            [
+                {
+                    "type": "function",
+                    "function": {
+                        "name": f.name,
+                        "description": f.description or "",
+                        "parameters": {
+                            "type": "object",
+                            "properties": {
+                                p.name: {
+                                    "type": python_to_json_schema_type.get(p.type_, "string"),
+                                    "description": p.description or ""
+                                }
+                                for p in f.parameters
+                            },
+                            "required": [p.name for p in f.parameters if p.is_required]
+                        }
+                    }
+                }
+                for f in getattr(config, "available_functions", [])
+            ]
+        ),
+        req_settings
+    )
 
     arguments = KernelArguments(settings=req_settings)
 
